@@ -8,5 +8,5 @@ OBJS := $(wildcard src/*.o)
 
 main:
 	$(AS) $(SOURCES) $(ASFLAGS)
-	$(LD) $(OBJS) -o zcat $(LDFLAGS)
-	strip zcat
+	$(LD) $(OBJS) -o smolcat $(LDFLAGS)
+	strip smolcat

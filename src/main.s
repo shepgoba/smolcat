@@ -133,4 +133,4 @@ _start:
 
 isdirstr: db "Error: This file is a directory", 0xa ; 32
 file_not_found: db "Error: No such file or directory", 0xa ; 33
-arg_str: db "Usage: zcat <file>", 0xa
+arg_str: db "Usage: smolcat <file>", 0xa
