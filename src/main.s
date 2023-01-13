@@ -14,8 +14,6 @@ _start:
 	cmp dword [rsp], 2 ; argc
 	jl .badargs
 
-	xor r13, r13 ; used for lea
-
 	mov rdi, [rsp + 8] ; args
 	xor edx, edx
 .strloop:
@@ -26,7 +24,8 @@ _start:
 
 	; edx is already guaranteed to be 0
 
-	lea eax, [edx + 2] ; mov eax, sys_open ; rdi = path
+	push 2
+	pop rax ; eax = 2
 	xor esi, esi ; esi = O_READ
 
 	syscall
@@ -34,7 +33,8 @@ _start:
 	cmp rax, -4095 ; could compare eax, maybe UB(?)
 	jb .file_valid
 
-	lea edx, [r13 + 33] ; mov edx, 33
+	push 33
+	pop rdx
 	lea rsi, [rel file_not_found]
 	call .write_stdout_wrapper
 
@@ -95,24 +95,30 @@ _start:
 	; add rsp, rbp ; not technically needed
 
 .done: ; make sure fd is still in ebx
-	lea eax, [r13 + 3]; mov eax, sys_close
+	push 3 ; mov eax, sys_close
+	pop rax
 	mov edi, ebx
 	syscall
 
 .done_no_close: ; exit cleanly
-	lea eax, [r13 + 60]; mov eax, sys_exit
+	push 60; mov eax, sys_exit
+	pop rax
 	xor edi, edi
 	syscall
 
 .direrror:
-	lea edx, [r13 + 28] ; mov edx, 28
+	; mov edx, 28
+	push 28
+	pop rdx
 	lea rsi, [rel isdirstr]
 	call .write_stdout_wrapper
 
 	jmp .done
 
 .badargs:
-	lea edx, [r13 + 22]; mov edx, 22
+	;mov edx, 22
+	push 22
+	pop rdx
 	lea rsi, [rel arg_str]
 	call .write_stdout_wrapper
 
@@ -120,8 +126,8 @@ _start:
 
 ; set edx and rsi before calling
 .write_stdout_wrapper:
-	xor eax, eax
-	inc eax
+	push 1
+	pop rax
 	mov edi, eax
 	syscall
 	ret
