@@ -14,6 +14,8 @@ _start:
 	cmp dword [rsp], 2 ; argc
 	jl .badargs
 
+	xor r13, r13 ; used for lea
+
 	mov rdi, [rsp + 8] ; args
 	xor edx, edx
 .strloop:
@@ -32,7 +34,7 @@ _start:
 	cmp rax, -4095 ; could compare eax, maybe UB(?)
 	jb .file_valid
 
-	mov edx, 33
+	lea edx, [r13 + 33] ; mov edx, 33
 	lea rsi, [rel file_not_found]
 	call .write_stdout_wrapper
 
@@ -81,10 +83,9 @@ _start:
 	jz .done
 
 	xor eax, eax ; mov eax, sys_read
-
-	mov edi, ebx
-	mov rdx, r12
-	mov rsi, rsp
+	mov edi, ebx ; edi = fd
+	mov rdx, r12 ; rdx = print_buf_size
+	mov rsi, rsp ; rsi = top of stack
 	syscall
 
 	mov rsi, rsp
@@ -94,24 +95,24 @@ _start:
 	; add rsp, rbp ; not technically needed
 
 .done: ; make sure fd is still in ebx
-	mov eax, sys_close
+	lea eax, [r13 + 3]; mov eax, sys_close
 	mov edi, ebx
 	syscall
 
 .done_no_close: ; exit cleanly
-	mov eax, sys_exit
+	lea eax, [r13 + 60]; mov eax, sys_exit
 	xor edi, edi
 	syscall
 
 .direrror:
-	mov edx, 28
+	lea edx, [r13 + 28] ; mov edx, 28
 	lea rsi, [rel isdirstr]
 	call .write_stdout_wrapper
 
 	jmp .done
 
 .badargs:
-	mov edx, 22
+	lea edx, [r13 + 22]; mov edx, 22
 	lea rsi, [rel arg_str]
 	call .write_stdout_wrapper
 
