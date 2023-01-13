@@ -15,22 +15,22 @@ _start:
 	jl .badargs
 
 	mov rdi, [rsp + 8] ; args
-	xor eax, eax
+	xor edx, edx
 .strloop:
-	mov al, [rdi]
+	mov dl, [rdi]
 	inc rdi
-	test al, al
+	test dl, dl
 	jnz .strloop
 
-	mov eax, sys_open ; rdi = path
+	; edx is already guaranteed to be 0
+
+	lea eax, [edx + 2] ; mov eax, sys_open ; rdi = path
 	xor esi, esi ; esi = O_READ
-	xor edx, edx ; flags = 0
+
 	syscall
 
-	cmp eax, -1
-	jg .file_valid
-	cmp eax, -4095
-	jl .file_valid
+	cmp rax, -4095 ; could compare eax, maybe UB(?)
+	jb .file_valid
 
 	mov edx, 33
 	lea rsi, [rel file_not_found]
