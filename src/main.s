@@ -24,10 +24,9 @@ _start:
 
 	; edx is already guaranteed to be 0
 
-	push 2
+	push sys_open
 	pop rax ; eax = 2
 	xor esi, esi ; esi = O_READ
-
 	syscall
 
 	cmp rax, -4095 ; could compare eax, maybe UB(?)
@@ -46,7 +45,8 @@ _start:
 	mov ebx, eax
 
 	mov edi, ebx
-	mov eax, sys_fstat
+	push sys_fstat
+	pop rax; mov eax, sys_fstat
 	lea rsi, [rsp - 144]
 	syscall
 
@@ -95,13 +95,13 @@ _start:
 	; add rsp, rbp ; not technically needed
 
 .done: ; make sure fd is still in ebx
-	push 3 ; mov eax, sys_close
+	push sys_close ; mov eax, sys_close
 	pop rax
 	mov edi, ebx
 	syscall
 
 .done_no_close: ; exit cleanly
-	push 60; mov eax, sys_exit
+	push sys_exit; mov eax, sys_exit
 	pop rax
 	xor edi, edi
 	syscall
@@ -126,7 +126,7 @@ _start:
 
 ; set edx and rsi before calling
 .write_stdout_wrapper:
-	push 1
+	push sys_write
 	pop rax
 	mov edi, eax
 	syscall
