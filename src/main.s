@@ -34,7 +34,7 @@ _start:
 
 	mov edx, 33
 	lea rsi, [rel file_not_found]
-	call .sys_write_wrapper
+	call .write_stdout_wrapper
 
 	jmp .done_no_close
 
@@ -69,7 +69,7 @@ _start:
 	mov rsi, rsp ; rsi = top of stack
 	mov edx, ebp ; edx = print_buf_size
 
-	call .sys_write_wrapper
+	call .write_stdout_wrapper
 
 	sub r12, rbp
 
@@ -90,8 +90,8 @@ _start:
 	mov rsi, rsp
 	mov rdx, r12
 
-	call .sys_write_wrapper
-	add rsp, rbp
+	call .write_stdout_wrapper
+	; add rsp, rbp ; not technically needed
 
 .done: ; make sure fd is still in ebx
 	mov eax, sys_close
@@ -106,19 +106,19 @@ _start:
 .direrror:
 	mov edx, 28
 	lea rsi, [rel isdirstr]
-	call .sys_write_wrapper
+	call .write_stdout_wrapper
 
 	jmp .done
 
 .badargs:
 	mov edx, 22
 	lea rsi, [rel arg_str]
-	call .sys_write_wrapper
+	call .write_stdout_wrapper
 
 	jmp .done_no_close
 
 ; set edx and rsi before calling
-.sys_write_wrapper:
+.write_stdout_wrapper:
 	xor eax, eax
 	inc eax
 	mov edi, eax
@@ -127,4 +127,4 @@ _start:
 
 isdirstr: db "Error: Input is a directory", 0xa ; 28
 file_not_found: db "Error: No such file or directory", 0xa ; 33
-arg_str: db "Usage: smolcat <file>", 0xa
+arg_str: db "Usage: smolcat <file>", 0xa ; 22
