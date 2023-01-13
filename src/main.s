@@ -39,14 +39,16 @@ _start:
 	jmp .done_no_close
 
 .file_valid:
+	; eax holds fd
+	; now ebx
 	mov ebx, eax
+
 	mov edi, ebx
 	mov eax, sys_fstat
 	lea rsi, [rsp - 144]
 	syscall
 
 	; test if directory
-	xor edi, edi
 	mov esi, [rsp - 120]
 	test esi, 0x4000
 	jnz .direrror
