@@ -76,7 +76,6 @@ _start:
 	call .write_stdout_wrapper
 
 	sub r12, r13
-	test r12, r12
 	jnz .writeloop
 
 .done: ; make sure fd is still in ebx
