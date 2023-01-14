@@ -7,7 +7,6 @@
 %define sys_exit 60
 %define print_buf_size 4096
 
-
 global _start
 section .text
 _start:
@@ -39,19 +38,16 @@ _start:
 
 	jmp .done_no_close
 
-.file_valid:
-	; eax holds fd
-	; now ebx
+.file_valid: ; eax holds fd
 	mov ebx, eax
 
 	mov edi, ebx
 	push sys_fstat
-	pop rax; mov eax, sys_fstat
+	pop rax ; mov eax, sys_fstat
 	lea rsi, [rsp - 144]
 	syscall
 
-	; test if directory
-	mov esi, [rsp - 120]
+	mov esi, [rsp - 120] ; test if directory
 	test esi, 0x4000
 	jnz .direrror
 	
@@ -59,7 +55,6 @@ _start:
 	mov ebp, print_buf_size
 
 	sub rsp, rbp
-
 .writeloop:
 	mov r13, rbp ; edx = print_buf_size
 	cmp r12, rbp
@@ -77,36 +72,29 @@ _start:
 
 	sub r12, r13 ; sets 0 flag
 	jnz .writeloop
-
 .done: ; make sure fd is still in ebx
 	push sys_close ; mov eax, sys_close
 	pop rax
 	mov edi, ebx
 	syscall
-
 .done_no_close: ; exit cleanly
-	push sys_exit; mov eax, sys_exit
+	push sys_exit ; mov eax, sys_exit
 	pop rax
 	xor edi, edi
 	syscall
 
 .direrror:
-	; mov edx, 28
-	push 28
+	push 28 ; mov edx, 28
 	pop rdx
 	lea rsi, [rel isdirstr]
 	call .write_stdout_wrapper
 
 	jmp .done
-
 .badargs:
-	; mov edx, 22
-	push 22
+	push 22 ; mov edx, 22
 	pop rdx
 	lea rsi, [rel arg_str]
-
 	push .done_no_close ; jank return address
-
 ; set edx and rsi before calling
 .write_stdout_wrapper:
 	push sys_write
