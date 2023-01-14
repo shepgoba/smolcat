@@ -59,40 +59,25 @@ _start:
 	mov ebp, print_buf_size
 
 	sub rsp, rbp
-	jmp .writeloopstart
 
 .writeloop:
+	mov r13, rbp ; edx = print_buf_size
+	cmp r12, rbp
+	cmovl r13, r12
+
+	mov rdx, r13
 	xor eax, eax ; eax = sys_read (syscall no.)
 	mov edi, ebx ; edi = fd
-	mov edx, ebp ; edx = print_buf_size
 	mov rsi, rsp ; rsi = top of stack
 	syscall
 
 	mov rsi, rsp ; rsi = top of stack
-	mov edx, ebp ; edx = print_buf_size
-
+	mov rdx, r13  ; edx = print_buf_size
 	call .write_stdout_wrapper
 
-	sub r12, rbp
-
-.writeloopstart:
-	cmp r12, rbp
-	jg .writeloop
-
+	sub r12, r13
 	test r12, r12
-	jz .done
-
-	xor eax, eax ; mov eax, sys_read
-	mov edi, ebx ; edi = fd
-	mov rdx, r12 ; rdx = print_buf_size
-	mov rsi, rsp ; rsi = top of stack
-	syscall
-
-	mov rsi, rsp
-	mov rdx, r12
-
-	call .write_stdout_wrapper
-	; add rsp, rbp ; not technically needed
+	jnz .writeloop
 
 .done: ; make sure fd is still in ebx
 	push sys_close ; mov eax, sys_close
