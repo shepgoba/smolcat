@@ -75,7 +75,7 @@ _start:
 	mov rdx, r13  ; edx = print_buf_size
 	call .write_stdout_wrapper
 
-	sub r12, r13
+	sub r12, r13 ; sets 0 flag
 	jnz .writeloop
 
 .done: ; make sure fd is still in ebx
@@ -100,13 +100,12 @@ _start:
 	jmp .done
 
 .badargs:
-	;mov edx, 22
+	; mov edx, 22
 	push 22
 	pop rdx
 	lea rsi, [rel arg_str]
-	call .write_stdout_wrapper
 
-	jmp .done_no_close
+	push .done_no_close ; jank return address
 
 ; set edx and rsi before calling
 .write_stdout_wrapper:
