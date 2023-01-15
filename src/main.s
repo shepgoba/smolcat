@@ -35,7 +35,7 @@ _start:
 	mov esi, file_not_found
 	call .write_stdout_wrapper
 
-	jmp .done_no_close
+	jmp .exit
 
 .file_valid: ; eax holds fd
 	sub rsp, 96
@@ -47,7 +47,7 @@ _start:
 	lea rsi, [rsp - 48]
 	syscall
 
-	test byte [rsp - 23], 0x40; test if directory
+	test byte [rsp - 23], 0x40 ; test if directory, on newer linux this would be 8 bytes higher (rsp - 15)
 	jnz .direrror
 	
 	mov r12, [rsp] ; r12 = st_size (struct offset 48)
@@ -71,12 +71,12 @@ _start:
 
 	sub r12, r13 ; sets 0 flag
 	jnz .writeloop
-.done: ; make sure fd is still in ebx
+.exit_close: ; make sure fd is still in ebx
 	push sys_close ; mov eax, sys_close
 	pop rax
 	mov edi, ebx
 	syscall
-.done_no_close: ; exit cleanly
+.exit: ; exit cleanly
 	push sys_exit ; mov eax, sys_exit
 	pop rax
 	xor edi, edi
@@ -87,13 +87,12 @@ _start:
 	pop rdx
 	mov esi, isdirstr
 	call .write_stdout_wrapper
-
-	jmp .done
+	jmp .exit_close
 .badargs:
 	push 22 ; mov edx, 22
 	pop rdx
 	mov esi, arg_str
-	push .done_no_close ; jank return address
+	push .exit ; jank return address
 ; set edx and rsi before calling
 .write_stdout_wrapper:
 	push sys_write
