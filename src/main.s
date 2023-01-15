@@ -46,8 +46,9 @@ _start:
 	lea rsi, [rsp - 144]
 	syscall
 
-	mov esi, [rsp - 120] ; test if directory
-	test esi, 0x4000
+	; mov esi, [rsp - 120] ; test if directory
+	; test esi, 0x4000
+	test byte [rsp - 119], 0x40; test if directory
 	jnz .direrror
 	
 	mov r12, [rsp - 96] ; r12 = st_size (struct offset 48)
