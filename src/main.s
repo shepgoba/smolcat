@@ -38,20 +38,19 @@ _start:
 	jmp .done_no_close
 
 .file_valid: ; eax holds fd
-	sub rsp, 144
+	sub rsp, 96
 	mov ebx, eax
 
 	mov edi, ebx
 	push sys_fstat
 	pop rax ; mov eax, sys_fstat
-	; lea rsi, [rsp - 144]
-	mov rsi, rsp
+	lea rsi, [rsp - 48]
 	syscall
 
-	test byte [rsp + 25], 0x40; test if directory
+	test byte [rsp - 23], 0x40; test if directory
 	jnz .direrror
 	
-	mov r12, [rsp + 48] ; r12 = st_size (struct offset 48)
+	mov r12, [rsp] ; r12 = st_size (struct offset 48)
 	mov ebp, print_buf_size
 
 	sub rsp, rbp
