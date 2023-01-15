@@ -22,7 +22,6 @@ _start:
 	jnz .strloop
 
 	; edx is already guaranteed to be 0
-
 	push sys_open
 	pop rax ; eax = 2
 	xor esi, esi ; esi = O_READ
@@ -33,7 +32,7 @@ _start:
 
 	push 33
 	pop rdx
-	lea rsi, [rel file_not_found]
+	mov esi, file_not_found
 	call .write_stdout_wrapper
 
 	jmp .done_no_close
@@ -86,14 +85,14 @@ _start:
 .direrror:
 	push 28 ; mov edx, 28
 	pop rdx
-	lea rsi, [rel isdirstr]
+	mov esi, isdirstr
 	call .write_stdout_wrapper
 
 	jmp .done
 .badargs:
 	push 22 ; mov edx, 22
 	pop rdx
-	lea rsi, [rel arg_str]
+	mov esi, arg_str
 	push .done_no_close ; jank return address
 ; set edx and rsi before calling
 .write_stdout_wrapper:
