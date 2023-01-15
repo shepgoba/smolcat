@@ -28,7 +28,7 @@ _start:
 	xor esi, esi ; esi = O_READ
 	syscall
 
-	cmp rax, -4095 ; could compare eax, maybe UB(?)
+	cmp eax, -4095
 	jb .file_valid
 
 	push 33
