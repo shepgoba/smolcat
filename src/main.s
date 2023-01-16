@@ -5,13 +5,13 @@
 %define sys_stat 4
 %define sys_fstat 5
 %define sys_exit 60
-%define print_buf_size 4096
+%define print_buf_size 16384
 
 global _start
 section .text
 _start:
 	cmp dword [rsp], 2 ; argc
-	jl .badargs
+	jl .badargs_shim ; using shim so the jump relative imm8 can be used, saves 2 bytes (2+2 vs 6)
 
 	mov rdi, [rsp + 8] ; args
 	xor edx, edx
@@ -36,7 +36,8 @@ _start:
 	call .write_stdout_wrapper
 
 	jmp .exit
-
+.badargs_shim:
+	jmp .badargs ; using shim so the jump relative imm8 can be used, saves 2 bytes (2+2 vs 6)
 .file_valid: ; eax holds fd
 	sub rsp, 96
 	mov ebx, eax
@@ -55,11 +56,11 @@ _start:
 
 	sub rsp, rbp
 .writeloop:
-	mov r13, rbp ; edx = print_buf_size
+	mov r13, rbp 
 	cmp r12, rbp
 	cmovl r13, r12
 
-	mov rdx, r13
+	mov rdx, r13 ; edx = amount to read (print_buf_size or less)
 	xor eax, eax ; eax = sys_read (syscall no.)
 	mov edi, ebx ; edi = fd
 	mov rsi, rsp ; rsi = top of stack
