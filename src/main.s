@@ -1,3 +1,4 @@
+; tested on x86-64, linux 4.4.0
 %define sys_read 0
 %define sys_write 1
 %define sys_open 2
@@ -48,7 +49,7 @@ _start:
 	lea rsi, [rsp - 48]
 	syscall
 
-	test byte [rsp - 23], 0x40 ; test if directory, on newer linux this would be 8 bytes higher (rsp - 15)
+	test byte [rsp - 23], 0x40 ; test if directory, on newer linux this should be 8 bytes higher (rsp - 15)
 	jnz .direrror
 	
 	mov r12, [rsp] ; r12 = st_size (struct offset 48)
@@ -82,7 +83,6 @@ _start:
 	pop rax
 	xor edi, edi
 	syscall
-
 .direrror:
 	push 28 ; mov edx, 28
 	pop rdx
